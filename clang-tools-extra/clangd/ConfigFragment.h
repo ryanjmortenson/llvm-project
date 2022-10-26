@@ -307,6 +307,11 @@ struct Fragment {
     llvm::Optional<Located<bool>> Designators;
   };
   InlayHintsBlock InlayHints;
+
+  struct WorkspaceSymbolsFileFilterBlock {
+    std::vector<Located<std::string>> FilterList;
+  };
+  WorkspaceSymbolsFileFilterBlock WorkspaceSymbolsFileFilter;
 };
 
 } // namespace config

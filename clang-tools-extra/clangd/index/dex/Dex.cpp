@@ -26,6 +26,7 @@
 #include <queue>
 #include <utility>
 #include <vector>
+#include <regex>
 
 namespace clang {
 namespace clangd {

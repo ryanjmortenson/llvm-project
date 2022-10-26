@@ -10,6 +10,7 @@
 #include "llvm/ADT/SmallSet.h"
 #include "llvm/ADT/SmallString.h"
 #include "llvm/ADT/StringRef.h"
+#include "support/Logger.h"
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/SourceMgr.h"
 #include "llvm/Support/YAMLParser.h"
@@ -68,11 +69,21 @@ public:
     Dict.handle("Completion", [&](Node &N) { parse(F.Completion, N); });
     Dict.handle("Hover", [&](Node &N) { parse(F.Hover, N); });
     Dict.handle("InlayHints", [&](Node &N) { parse(F.InlayHints, N); });
+    Dict.handle("WorkspaceSymbolsFileFilter", [&](Node &N) { parse(F.WorkspaceSymbolsFileFilter, N); });
     Dict.parse(N);
     return !(N.failed() || HadError);
   }
 
 private:
+  void parse(Fragment::WorkspaceSymbolsFileFilterBlock &F, Node &N) {
+    DictParser Dict("WorkspaceSymbolsFileFilter", this);
+    Dict.handle("FilterLlst", [&](Node &N) {
+      if (auto Values = scalarValues(N))
+        F.FilterList = std::move(*Values);
+    });
+    Dict.parse(N);
+  }
+
   void parse(Fragment::IfBlock &F, Node &N) {
     DictParser Dict("If", this);
     Dict.unrecognized([&](Located<std::string>, Node &) {

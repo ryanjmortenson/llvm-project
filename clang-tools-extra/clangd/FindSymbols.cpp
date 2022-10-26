@@ -8,6 +8,7 @@
 #include "FindSymbols.h"
 
 #include "AST.h"
+#include "Config.h"
 #include "FuzzyMatch.h"
 #include "ParsedAST.h"
 #include "Quality.h"
@@ -20,11 +21,14 @@
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/ADT/StringRef.h"
+#include "llvm/Support/Regex.h"
 #include <limits>
+#include <regex>
 #include <tuple>
 
 #define DEBUG_TYPE "FindSymbols"
 
+using namespace std;
 namespace clang {
 namespace clangd {
 
@@ -125,6 +129,14 @@ getWorkspaceSymbols(llvm::StringRef Query, int Limit,
     if (!Loc) {
       log("Workspace symbols: {0}", Loc.takeError());
       return;
+    }
+
+    const Config &Cfg = Config::current();
+    for (auto &Filter : Cfg.WorkspaceSymbolsFileFilter.Filters) {
+      if (Filter(Loc->uri.file())) {
+        log("Ignoring file {0} due to configuration", Loc->uri.file());
+        return;
+      }
     }
 
     SymbolQualitySignals Quality;

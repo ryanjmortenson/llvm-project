@@ -198,6 +198,7 @@ struct FragmentCompiler {
     compile(std::move(F.Hover));
     compile(std::move(F.InlayHints));
     compile(std::move(F.Style));
+    compile(std::move(F.WorkspaceSymbolsFileFilter));
   }
 
   void compile(Fragment::IfBlock &&F) {
@@ -566,6 +567,36 @@ struct FragmentCompiler {
         C.Hover.ShowAKA = ShowAKA;
       });
     }
+  }
+
+  void compile(Fragment::WorkspaceSymbolsFileFilterBlock &&F) {
+    static llvm::Regex::RegexFlags Flags = llvm::Regex::NoFlags;
+    auto Filters = std::make_shared<std::vector<llvm::Regex>>();
+    for (auto &FileFilter: F.FilterList) {
+      // Anchor on the right.
+      llvm::Regex CompiledRegex(*FileFilter, Flags);
+      std::string RegexError;
+      if (!CompiledRegex.isValid(RegexError)) {
+        diag(Warning,
+             llvm::formatv("Invalid regular expression '{0}': {1}",
+                           *FileFilter, RegexError)
+                 .str(),
+             FileFilter.Range);
+        continue;
+      }
+      Filters->push_back(std::move(CompiledRegex));
+    }
+    if (Filters->empty())
+      return;
+    auto Filter = [Filters](llvm::StringRef Path) {
+      for (auto &Regex : *Filters)
+        if (Regex.match(Path))
+          return true;
+      return false;
+    };
+    Out.Apply.push_back([Filter](const Params &, Config &C) {
+      C.WorkspaceSymbolsFileFilter.Filters.emplace_back(Filter);
+    });
   }
 
   void compile(Fragment::InlayHintsBlock &&F) {

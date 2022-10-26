@@ -140,6 +140,10 @@ struct Config {
     bool DeducedTypes = true;
     bool Designators = true;
   } InlayHints;
+
+  struct {
+    std::vector<std::function<bool(llvm::StringRef)>> Filters;
+  } WorkspaceSymbolsFileFilter;
 };
 
 } // namespace clangd
