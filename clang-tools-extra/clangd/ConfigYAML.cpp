@@ -77,7 +77,7 @@ public:
 private:
   void parse(Fragment::WorkspaceSymbolsFileFilterBlock &F, Node &N) {
     DictParser Dict("WorkspaceSymbolsFileFilter", this);
-    Dict.handle("FilterLlst", [&](Node &N) {
+    Dict.handle("FilterList", [&](Node &N) {
       if (auto Values = scalarValues(N))
         F.FilterList = std::move(*Values);
     });
