@@ -220,6 +220,10 @@ struct Config {
   struct {
     CommentFormatPolicy CommentFormat = CommentFormatPolicy::PlainText;
   } Documentation;
+
+  struct {
+    std::vector<std::function<bool(llvm::StringRef)>> Filters;
+  } WorkspaceSymbolsFileFilter;
 };
 
 } // namespace clangd

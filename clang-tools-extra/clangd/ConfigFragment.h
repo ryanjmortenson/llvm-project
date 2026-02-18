@@ -412,6 +412,11 @@ struct Fragment {
     std::optional<Located<std::string>> CommentFormat;
   };
   DocumentationBlock Documentation;
+
+  struct WorkspaceSymbolsFileFilterBlock {
+    std::vector<Located<std::string>> FilterList;
+  };
+  WorkspaceSymbolsFileFilterBlock WorkspaceSymbolsFileFilter;
 };
 
 } // namespace config

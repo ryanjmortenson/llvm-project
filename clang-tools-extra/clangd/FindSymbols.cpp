@@ -8,6 +8,7 @@
 #include "FindSymbols.h"
 
 #include "AST.h"
+#include "Config.h"
 #include "FuzzyMatch.h"
 #include "ParsedAST.h"
 #include "Quality.h"
@@ -325,6 +326,14 @@ getWorkspaceSymbols(llvm::StringRef Query, int Limit,
     if (!Loc) {
       log("Workspace symbols: {0}", Loc.takeError());
       return;
+    }
+
+    const Config &Cfg = Config::current();
+    for (auto &Filter : Cfg.WorkspaceSymbolsFileFilter.Filters) {
+      if (Filter(Loc->uri.file())) {
+        log("Ignoring file {0} due to configuration", Loc->uri.file());
+        return;
+      }
     }
 
     SymbolQualitySignals Quality;

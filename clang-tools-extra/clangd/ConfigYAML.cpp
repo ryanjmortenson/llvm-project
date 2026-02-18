@@ -70,6 +70,7 @@ public:
     Dict.handle("InlayHints", [&](Node &N) { parse(F.InlayHints, N); });
     Dict.handle("SemanticTokens", [&](Node &N) { parse(F.SemanticTokens, N); });
     Dict.handle("Documentation", [&](Node &N) { parse(F.Documentation, N); });
+    Dict.handle("WorkspaceSymbolsFileFilter", [&](Node &N) { parse(F.WorkspaceSymbolsFileFilter, N); });
     Dict.parse(N);
     return !(N.failed() || HadError);
   }
@@ -326,6 +327,15 @@ private:
     Dict.handle("CommentFormat", [&](Node &N) {
       if (auto Value = scalarValue(N, "CommentFormat"))
         F.CommentFormat = *Value;
+    });
+    Dict.parse(N);
+  }
+
+  void parse(Fragment::WorkspaceSymbolsFileFilterBlock &F, Node &N) {
+    DictParser Dict("WorkspaceSymbolsFileFilter", this);
+    Dict.handle("FilterList", [&](Node &N) {
+      if (auto Values = scalarValues(N))
+        F.FilterList = std::move(*Values);
     });
     Dict.parse(N);
   }
